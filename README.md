@@ -399,7 +399,21 @@ curl https://basic-hono-api.borisbelmarm.workers.dev/health
 
 ## 🧪 Ejemplos de Uso
 
-### Flujo Completo
+### Con Bruno API Client
+
+El proyecto incluye una colección completa de Bruno con todos los endpoints documentados:
+
+1. **Abrir colección:** Abre Bruno → "Open Collection" → Selecciona la carpeta `bruno/`
+2. **Seleccionar entorno:** Elige "Local" o "Production"
+3. **Autenticación automática:** 
+   - Ejecuta "Register" o "Login"
+   - El token se guarda automáticamente en la variable secreta `authToken`
+   - Todos los requests siguientes usan el token automáticamente
+4. **Probar endpoints:** Usa cualquier request de la carpeta "Todos"
+
+**🔐 Nota:** El token se maneja como secret y no se commitea al repositorio.
+
+### Con cURL (Flujo Completo)
 
 ```bash
 # 1. Registrar usuario
@@ -454,6 +468,40 @@ basic-hono-api/
 │   │   └── todo.schema.ts        # Validaciones Zod para todos
 │   ├── types/
 │   │   ├── user.types.ts         # Tipos TypeScript de usuarios
+│   │   └── todo.types.ts         # Tipos TypeScript de todos
+│   ├── utils/
+│   │   ├── crypto.ts             # Hashing de passwords (scrypt)
+│   │   └── jwt.ts                # Generación/verificación JWT
+│   └── index.ts                  # Entry point
+├── migrations/
+│   ├── 001_create_todos_table.sql      # Migración inicial de todos
+│   ├── 002_create_users_table.sql      # Tabla de usuarios
+│   └── 003_add_user_id_to_todos.sql    # Relación user-todo
+├── bruno/
+│   ├── Auth/                     # Requests de autenticación
+│   │   ├── Register.bru          # POST /auth/register (guarda token)
+│   │   └── Login.bru             # POST /auth/login (guarda token)
+│   ├── Todos/                    # Requests CRUD de todos
+│   │   ├── List Todos.bru        # GET /todos
+│   │   ├── Get Todo.bru          # GET /todos/:id
+│   │   ├── Create Todo.bru       # POST /todos
+│   │   ├── Update Todo (PUT).bru # PUT /todos/:id
+│   │   ├── Update Todo (PATCH).bru # PATCH /todos/:id
+│   │   └── Delete Todo.bru       # DELETE /todos/:id
+│   ├── environments/             # Entornos (Local, Production)
+│   ├── Health Check.bru          # GET /health
+│   ├── API Info.bru              # GET /
+│   ├── bruno.json                # Configuración de colección
+│   └── .gitignore                # Ignora archivo de secrets
+├── .github/
+│   └── workflows/
+│       └── deploy.yml            # GitHub Actions para deploy automático
+├── wrangler.toml                 # Config Cloudflare Workers
+├── .dev.vars                     # Variables de entorno local
+├── eslint.config.js              # Config ESLint
+├── tsconfig.json                 # Config TypeScript
+└── package.json
+```
 │   │   └── todo.types.ts         # Tipos TypeScript de todos
 │   ├── utils/
 │   │   ├── crypto.ts             # Hashing de passwords (scrypt)

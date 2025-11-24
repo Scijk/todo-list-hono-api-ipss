@@ -1,0 +1,15 @@
+meta {
+  name: List Todos
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/todos
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}

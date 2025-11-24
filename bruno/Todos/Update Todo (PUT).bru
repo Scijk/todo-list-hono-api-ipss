@@ -1,0 +1,31 @@
+meta {
+  name: Update Todo (PUT)
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/todos/:id
+  body: json
+  auth: bearer
+}
+
+params:path {
+  id: 
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+body:json {
+  {
+    "title": "Comprar pan",
+    "completed": true,
+    "location": {
+      "latitude": 40.7128,
+      "longitude": -74.0060
+    },
+    "photoUri": "https://example.com/new-photo.jpg"
+  }
+}

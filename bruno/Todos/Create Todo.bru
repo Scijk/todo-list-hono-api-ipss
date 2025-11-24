@@ -1,0 +1,27 @@
+meta {
+  name: Create Todo
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/todos
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{authToken}}
+}
+
+body:json {
+  {
+    "title": "Comprar leche",
+    "completed": false,
+    "location": {
+      "latitude": 40.7128,
+      "longitude": -74.0060
+    },
+    "photoUri": "https://example.com/photo.jpg"
+  }
+}
