@@ -1,11 +1,13 @@
 import { Hono } from 'hono'
 import todoRouter from './routes/todo.routes'
 import authRouter from './routes/auth.routes'
+import imageRouter from './routes/image.routes'
 
 type Bindings = {
   JWT_SECRET: string
   PASSWORD_SALT: string
   DB: D1Database
+  IMAGES: R2Bucket
 }
 
 const app = new Hono<{ Bindings: Bindings }>()
@@ -29,6 +31,7 @@ app.get('/', (c) => {
         login: '/auth/login',
       },
       todos: '/todos (requiere autenticación)',
+      images: '/images (requiere autenticación)',
     },
   })
 })
@@ -38,5 +41,8 @@ app.route('/auth', authRouter)
 
 // Router de todos (requiere autenticación)
 app.route('/todos', todoRouter)
+
+// Router de imágenes (requiere autenticación)
+app.route('/images', imageRouter)
 
 export default app

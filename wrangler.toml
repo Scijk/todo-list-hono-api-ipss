@@ -7,6 +7,10 @@ binding = "DB"
 database_name = "basic-hono-todos-db"
 database_id = "0325a644-dfd4-4af8-9ace-c38be14fa187"
 
+[[r2_buckets]]
+binding = "IMAGES"
+bucket_name = "todo-images"
+
 [env.production]
 name = "basic-hono-api-production"
 
@@ -14,3 +18,7 @@ name = "basic-hono-api-production"
 binding = "DB"
 database_name = "basic-hono-todos-db"
 database_id = "0325a644-dfd4-4af8-9ace-c38be14fa187"
+
+[[env.production.r2_buckets]]
+binding = "IMAGES"
+bucket_name = "todo-images"

@@ -1,0 +1,20 @@
+meta {
+  name: Delete Image
+  type: http
+  seq: 3
+}
+
+delete {
+  url: {{baseUrl}}/images/:userId/:imageId
+  body: none
+  auth: bearer
+}
+
+params:path {
+  userId: 
+  imageId: 
+}
+
+auth:bearer {
+  token: {{authToken}}
+}

@@ -7,6 +7,8 @@ API REST completa construida con Hono, TypeScript, Cloudflare Workers y D1 Datab
 - ✅ **Autenticación JWT** con scrypt-js para hashing de passwords
 - 🔒 **Sistema de usuarios** con registro y login
 - 📝 **CRUD de Todos** privado por usuario (aislamiento de datos)
+- 🖼️ **Gestión de imágenes** con Cloudflare R2 (upload, download, delete)
+- 🧹 **Limpieza automática** de imágenes huérfanas al actualizar/eliminar todos
 - 🗄️ **Cloudflare D1** como base de datos serverless (SQLite)
 - ✨ **Validación con Zod** en todas las rutas
 - 🎯 **TypeScript** con ESLint (Standard JS)
@@ -19,6 +21,7 @@ API REST completa construida con Hono, TypeScript, Cloudflare Workers y D1 Datab
 - **Framework:** Hono
 - **Runtime:** Cloudflare Workers
 - **Base de datos:** Cloudflare D1 (SQLite)
+- **Almacenamiento:** Cloudflare R2 (imágenes)
 - **Autenticación:** JWT (jose) + scrypt-js
 - **Validación:** Zod
 - **IDs:** nanoid
@@ -278,6 +281,66 @@ Authorization: Bearer {token}
 
 ---
 
+### 🖼️ Imágenes (Requiere Autenticación)
+
+**Todas las rutas de imágenes requieren el header:**
+```
+Authorization: Bearer {token}
+```
+
+#### Subir Imagen
+
+```bash
+POST /images
+Authorization: Bearer {token}
+Content-Type: multipart/form-data
+
+FormData:
+  image: [archivo de imagen]
+```
+
+**Validaciones:**
+- Tamaño máximo: 5MB
+- Formatos permitidos: JPEG, PNG, WebP, GIF
+
+**Respuesta exitosa (201):**
+```json
+{
+  "success": true,
+  "data": {
+    "url": "/images/abc123/xyz789.jpg",
+    "key": "abc123/xyz789.jpg",
+    "size": 245678,
+    "contentType": "image/jpeg"
+  }
+}
+```
+
+#### Obtener Imagen
+
+```bash
+GET /images/:userId/:imageId
+Authorization: Bearer {token}
+```
+
+**Respuesta:** Archivo de imagen con headers de cache
+
+#### Eliminar Imagen
+
+```bash
+DELETE /images/:userId/:imageId
+Authorization: Bearer {token}
+```
+
+**Nota:** Solo el dueño de la imagen puede eliminarla.
+
+**🧹 Limpieza automática:**
+- Al actualizar el `photoUri` de un todo, la imagen anterior se elimina automáticamente de R2
+- Al eliminar un todo, su imagen asociada se elimina automáticamente de R2
+- Previene acumulación de archivos huérfanos
+
+---
+
 ### Formato de Respuestas
 
 #### Éxito
@@ -409,7 +472,10 @@ El proyecto incluye una colección completa de Bruno con todos los endpoints doc
    - Ejecuta "Register" o "Login"
    - El token se guarda automáticamente en la variable secreta `authToken`
    - Todos los requests siguientes usan el token automáticamente
-4. **Probar endpoints:** Usa cualquier request de la carpeta "Todos"
+4. **Probar endpoints:** 
+   - Carpeta "Auth" - Registro y login
+   - Carpeta "Todos" - CRUD de todos
+   - Carpeta "Images" - Upload, obtener y eliminar imágenes
 
 **🔐 Nota:** El token se maneja como secret y no se commitea al repositorio.
 
@@ -423,7 +489,14 @@ curl -X POST http://localhost:8787/auth/register \
 
 # Respuesta incluye token JWT
 
-# 2. Crear un todo
+# 2. Subir una imagen
+curl -X POST http://localhost:8787/images \
+  -H "Authorization: Bearer eyJhbGc..." \
+  -F "image=@/ruta/a/tu/imagen.jpg"
+
+# Respuesta incluye URL de la imagen
+
+# 3. Crear un todo con imagen
 curl -X POST http://localhost:8787/todos \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer eyJhbGc..." \
@@ -433,20 +506,21 @@ curl -X POST http://localhost:8787/todos \
     "location": {
       "latitude": 40.7128,
       "longitude": -74.0060
-    }
+    },
+    "photoUri": "/images/abc123/xyz789.jpg"
   }'
 
-# 3. Listar todos
+# 4. Listar todos
 curl http://localhost:8787/todos \
   -H "Authorization: Bearer eyJhbGc..."
 
-# 4. Actualizar todo
+# 5. Actualizar todo (cambia la imagen - la anterior se elimina automáticamente)
 curl -X PATCH http://localhost:8787/todos/{id} \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer eyJhbGc..." \
-  -d '{"completed": true}'
+  -d '{"photoUri": "/images/abc123/nueva-imagen.jpg"}'
 
-# 5. Eliminar todo
+# 6. Eliminar todo (la imagen se elimina automáticamente de R2)
 curl -X DELETE http://localhost:8787/todos/{id} \
   -H "Authorization: Bearer eyJhbGc..."
 ```
@@ -462,16 +536,19 @@ basic-hono-api/
 │   │   └── auth.middleware.ts    # Middleware de autenticación JWT
 │   ├── routes/
 │   │   ├── auth.routes.ts        # Rutas de autenticación
-│   │   └── todo.routes.ts        # Rutas CRUD de todos
+│   │   ├── todo.routes.ts        # Rutas CRUD de todos
+│   │   └── image.routes.ts       # Rutas de gestión de imágenes (R2)
 │   ├── schemas/
 │   │   ├── auth.schema.ts        # Validaciones Zod para auth
-│   │   └── todo.schema.ts        # Validaciones Zod para todos
+│   │   ├── todo.schema.ts        # Validaciones Zod para todos
+│   │   └── image.schema.ts       # Validaciones Zod para imágenes
 │   ├── types/
 │   │   ├── user.types.ts         # Tipos TypeScript de usuarios
 │   │   └── todo.types.ts         # Tipos TypeScript de todos
 │   ├── utils/
 │   │   ├── crypto.ts             # Hashing de passwords (scrypt)
-│   │   └── jwt.ts                # Generación/verificación JWT
+│   │   ├── jwt.ts                # Generación/verificación JWT
+│   │   └── r2.ts                 # Utilidades para R2 (limpieza de imágenes)
 │   └── index.ts                  # Entry point
 ├── migrations/
 │   ├── 001_create_todos_table.sql      # Migración inicial de todos
@@ -488,6 +565,10 @@ basic-hono-api/
 │   │   ├── Update Todo (PUT).bru # PUT /todos/:id
 │   │   ├── Update Todo (PATCH).bru # PATCH /todos/:id
 │   │   └── Delete Todo.bru       # DELETE /todos/:id
+│   ├── Images/                   # Requests de imágenes
+│   │   ├── Upload Image.bru      # POST /images
+│   │   ├── Get Image.bru         # GET /images/:userId/:imageId
+│   │   └── Delete Image.bru      # DELETE /images/:userId/:imageId
 │   ├── environments/             # Entornos (Local, Production)
 │   ├── Health Check.bru          # GET /health
 │   ├── API Info.bru              # GET /
@@ -496,14 +577,12 @@ basic-hono-api/
 ├── .github/
 │   └── workflows/
 │       └── deploy.yml            # GitHub Actions para deploy automático
-├── wrangler.toml                 # Config Cloudflare Workers
+├── wrangler.toml                 # Config Cloudflare Workers + D1 + R2
 ├── .dev.vars                     # Variables de entorno local
 ├── eslint.config.js              # Config ESLint
 ├── tsconfig.json                 # Config TypeScript
 └── package.json
 ```
-│   │   └── todo.types.ts         # Tipos TypeScript de todos
-│   ├── utils/
 │   │   ├── crypto.ts             # Hashing de passwords (scrypt)
 │   │   └── jwt.ts                # Generación/verificación JWT
 │   └── index.ts                  # Entry point
@@ -529,6 +608,9 @@ basic-hono-api/
 - ✅ **Validación estricta** con Zod en todas las entradas
 - ✅ **Secretos en variables de entorno** (nunca en código)
 - ✅ **Aislamiento de datos** por usuario (WHERE user_id)
+- ✅ **Control de permisos** en eliminación de imágenes (solo el dueño)
+- ✅ **Validación de archivos** (tipo y tamaño de imágenes)
+- ✅ **Limpieza automática** de recursos huérfanos en R2
 - ✅ **HTTPS obligatorio** en producción (Cloudflare)
 - ✅ **Rate limiting** automático de Cloudflare Workers
 
@@ -538,6 +620,7 @@ basic-hono-api/
 - 🚫 **Nunca** cambiar `PASSWORD_SALT` (invalidaría todas las contraseñas)
 - 📊 Monitorear logs con `wrangler tail`
 - 🔐 Usar passwords fuertes (>12 caracteres recomendado)
+- 🖼️ Las imágenes son públicamente accesibles una vez subidas (considera usar signed URLs para producción)
 
 ---
 

@@ -4,10 +4,12 @@ import { nanoid } from 'nanoid'
 import type { Todo } from '../types/todo.types'
 import { createTodoSchema, updateTodoSchema, patchTodoSchema } from '../schemas/todo.schema'
 import { authMiddleware } from '../middleware/auth.middleware'
+import { deleteImageFromR2 } from '../utils/r2'
 
 type Bindings = {
   DB: D1Database
   JWT_SECRET: string
+  IMAGES: R2Bucket
 }
 
 type Variables = {
@@ -152,6 +154,12 @@ todoRouter.put('/:id', zValidator('json', updateTodoSchema), async (c) => {
 
     const body = c.req.valid('json')
 
+    // Si la imagen cambió, eliminar la anterior de R2
+    const oldPhotoUri = existing.photo_uri as string | undefined
+    if (oldPhotoUri && oldPhotoUri !== body.photoUri) {
+      await deleteImageFromR2(c.env.IMAGES, oldPhotoUri)
+    }
+
     const now = new Date().toISOString()
 
     await c.env.DB.prepare(
@@ -209,6 +217,14 @@ todoRouter.patch('/:id', zValidator('json', patchTodoSchema), async (c) => {
     }
 
     const body = c.req.valid('json')
+
+    // Si se actualiza la imagen, eliminar la anterior de R2
+    if (body.photoUri !== undefined) {
+      const oldPhotoUri = existing.photo_uri as string | undefined
+      if (oldPhotoUri && oldPhotoUri !== body.photoUri) {
+        await deleteImageFromR2(c.env.IMAGES, oldPhotoUri)
+      }
+    }
 
     const now = new Date().toISOString()
     const updates: string[] = []
@@ -270,6 +286,12 @@ todoRouter.delete('/:id', async (c) => {
         success: false,
         error: 'Todo not found',
       }, 404)
+    }
+
+    // Eliminar imagen asociada de R2 si existe
+    const photoUri = todo.photo_uri as string | undefined
+    if (photoUri) {
+      await deleteImageFromR2(c.env.IMAGES, photoUri)
     }
 
     await c.env.DB.prepare(
