@@ -12,3 +12,5 @@ export const uploadImageSchema = z.object({
       'Solo se permiten imágenes JPEG, PNG, WebP o GIF',
     ),
 })
+
+export type UploadImageInput = z.infer<typeof uploadImageSchema>

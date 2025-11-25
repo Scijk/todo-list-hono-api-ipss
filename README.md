@@ -15,6 +15,7 @@ API REST completa construida con Hono, TypeScript, Cloudflare Workers y D1 Datab
 - ⚡ **Desplegable en Cloudflare Workers**
 - 🔑 **Manejo seguro de secretos** con variables de entorno
 - 🚀 **CI/CD** con GitHub Actions para despliegue automático
+- 🏗️ **Arquitectura MVC** con controladores separados
 
 ## 📋 Stack Tecnológico
 
@@ -27,6 +28,45 @@ API REST completa construida con Hono, TypeScript, Cloudflare Workers y D1 Datab
 - **IDs:** nanoid
 - **Linting:** ESLint (Standard JS)
 - **Package Manager:** Yarn
+
+## 📁 Estructura del Proyecto
+
+```
+src/
+├── controllers/          # Lógica de negocio
+│   ├── auth/            # Controladores de autenticación
+│   │   ├── register.controller.ts
+│   │   └── login.controller.ts
+│   ├── todo/            # Controladores de todos
+│   │   ├── list.controller.ts
+│   │   ├── get.controller.ts
+│   │   ├── create.controller.ts
+│   │   ├── update.controller.ts
+│   │   ├── patch.controller.ts
+│   │   └── delete.controller.ts
+│   └── image/           # Controladores de imágenes
+│       ├── upload.controller.ts
+│       ├── get.controller.ts
+│       └── delete.controller.ts
+├── routes/              # Definición de rutas
+│   ├── auth.routes.ts
+│   ├── todo.routes.ts
+│   └── image.routes.ts
+├── middleware/          # Middlewares personalizados
+│   └── auth.middleware.ts
+├── schemas/             # Schemas de validación Zod
+│   ├── auth.schema.ts
+│   ├── todo.schema.ts
+│   └── image.schema.ts
+├── types/               # Tipos TypeScript
+│   ├── user.types.ts
+│   └── todo.types.ts
+├── utils/               # Funciones utilitarias
+│   ├── jwt.ts
+│   ├── crypto.ts
+│   └── r2.ts
+└── index.ts             # Punto de entrada
+```
 
 ## 🛠️ Instalación y Desarrollo
 
