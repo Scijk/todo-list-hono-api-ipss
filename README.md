@@ -7,7 +7,8 @@ API REST completa construida con Hono, TypeScript, Cloudflare Workers y D1 Datab
 - ✅ **Autenticación JWT** con scrypt-js para hashing de passwords
 - 🔒 **Sistema de usuarios** con registro y login
 - 📝 **CRUD de Todos** privado por usuario (aislamiento de datos)
-- 🖼️ **Gestión de imágenes** con Cloudflare R2 (upload, download, delete)
+- 🖼️ **Gestión de imágenes** con Cloudflare R2 (upload, download público, delete)
+- 🌐 **Acceso público a imágenes** sin necesidad de autenticación
 - 🧹 **Limpieza automática** de imágenes huérfanas al actualizar/eliminar todos
 - 🗄️ **Cloudflare D1** como base de datos serverless (SQLite)
 - ✨ **Validación con Zod** en todas las rutas
@@ -376,12 +377,14 @@ Authorization: Bearer {token}
 
 ---
 
-### 🖼️ Imágenes (Requiere Autenticación)
+### 🖼️ Imágenes
 
-**Todas las rutas de imágenes requieren el header:**
-```
-Authorization: Bearer {token}
-```
+**Rutas protegidas (requieren token):**
+- POST `/images` - Subir imagen
+- DELETE `/images/:userId/:imageId` - Eliminar imagen
+
+**Rutas públicas:**
+- GET `/images/:userId/:imageId` - Obtener imagen (sin autenticación)
 
 #### Subir Imagen
 
@@ -411,14 +414,24 @@ FormData:
 }
 ```
 
-#### Obtener Imagen
+#### Obtener Imagen (Público)
 
 ```bash
 GET /images/:userId/:imageId
-Authorization: Bearer {token}
 ```
 
+**⚠️ Nota:** Este endpoint es **público** y no requiere autenticación.
+
 **Respuesta:** Archivo de imagen con headers de cache
+
+**Headers de respuesta:**
+- `Content-Type`: Tipo MIME de la imagen (image/jpeg, image/png, etc.)
+- `Cache-Control`: `public, max-age=31536000` (1 año)
+
+**Ejemplo:**
+```bash
+curl http://localhost:8787/images/user123/abc123.jpg -o imagen.jpg
+```
 
 #### Eliminar Imagen
 
@@ -809,7 +822,10 @@ basic-hono-api/
 - 🚫 **Nunca** cambiar `PASSWORD_SALT` (invalidaría todas las contraseñas)
 - 📊 Monitorear logs con `wrangler tail`
 - 🔐 Usar passwords fuertes (>12 caracteres recomendado)
-- 🖼️ Las imágenes son públicamente accesibles una vez subidas (considera usar signed URLs para producción)
+- 🌐 **Las imágenes son públicamente accesibles** sin autenticación - considera implementar:
+  - Signed URLs con expiración para mayor control
+  - Validación de referrer para prevenir hotlinking
+  - Rate limiting específico para endpoints de imágenes
 
 ---
 

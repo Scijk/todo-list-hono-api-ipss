@@ -7,7 +7,8 @@ export const getImageRoute = createRoute({
   path: '/{userId}/{imageId}',
   tags: ['Images'],
   summary: 'Descargar imagen',
-  description: 'Descarga una imagen desde Cloudflare R2',
+  description: 'Descarga una imagen desde Cloudflare R2 (acceso público)',
+  security: [], // No requiere autenticación
   request: {
     params: z.object({
       userId: z.string().openapi({ example: 'user123' }),

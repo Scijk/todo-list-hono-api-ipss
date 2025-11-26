@@ -7,14 +7,10 @@ meta {
 get {
   url: {{baseUrl}}/images/:userId/:imageId
   body: none
-  auth: bearer
+  auth: none
 }
 
 params:path {
   userId: 
   imageId: 
-}
-
-auth:bearer {
-  token: {{authToken}}
 }

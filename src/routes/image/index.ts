@@ -20,20 +20,20 @@ type Variables = {
 
 const imageRouter = new OpenAPIHono<{ Bindings: Bindings; Variables: Variables }>()
 
-// Middleware de autenticación para todas las rutas
-imageRouter.use('/*', authMiddleware)
-
-// POST / - Subir imagen
-imageRouter.openapi(uploadImageRoute, async (c) => {
-  return (await uploadImageController(c)) as any
-})
-
-// GET /:userId/:imageId - Obtener imagen
+// GET /:userId/:imageId - Obtener imagen (público)
 imageRouter.openapi(getImageRoute, async (c) => {
   return (await getImageController(c as any)) as any
 })
 
-// DELETE /:userId/:imageId - Eliminar imagen
+// Middleware de autenticación para rutas protegidas
+imageRouter.use('/*', authMiddleware)
+
+// POST / - Subir imagen (protegido)
+imageRouter.openapi(uploadImageRoute, async (c) => {
+  return (await uploadImageController(c)) as any
+})
+
+// DELETE /:userId/:imageId - Eliminar imagen (protegido)
 imageRouter.openapi(deleteImageRoute, async (c) => {
   return (await deleteImageController(c)) as any
 })
