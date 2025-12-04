@@ -4,10 +4,10 @@ const getSecretKey = (jwtSecret: string): Uint8Array => {
   return new TextEncoder().encode(jwtSecret)
 }
 
-export const generateToken = async (userId: string, jwtSecret: string): Promise<string> => {
+export const generateToken = async (userId: string, email: string, jwtSecret: string): Promise<string> => {
   const secret = getSecretKey(jwtSecret)
 
-  const token = await new SignJWT({})
+  const token = await new SignJWT({ email })
     .setProtectedHeader({ alg: 'HS256' })
     .setSubject(userId)
     .setIssuedAt()
@@ -17,11 +17,19 @@ export const generateToken = async (userId: string, jwtSecret: string): Promise<
   return token
 }
 
-export const verifyToken = async (token: string, jwtSecret: string): Promise<string | null> => {
+export const verifyToken = async (token: string, jwtSecret: string): Promise<{ userId: string; email: string } | null> => {
   try {
     const secret = getSecretKey(jwtSecret)
     const { payload } = await jwtVerify(token, secret)
-    return payload.sub || null
+
+    if (!payload.sub || !payload.email) {
+      return null
+    }
+
+    return {
+      userId: payload.sub,
+      email: payload.email as string,
+    }
   } catch {
     return null
   }

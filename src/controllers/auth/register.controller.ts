@@ -52,7 +52,7 @@ export const registerController = async (c: Context<{ Bindings: Bindings }>) => 
     }
 
     // Generar token
-    const token = await generateToken(id, c.env.JWT_SECRET)
+    const token = await generateToken(id, user.email, c.env.JWT_SECRET)
 
     return c.json({
       success: true,

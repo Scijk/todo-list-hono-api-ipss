@@ -6,9 +6,10 @@ import { generateToken } from '../utils/jwt'
 describe('authMiddleware', () => {
   const testSecret = 'test-secret-key'
   const testUserId = 'user-123'
+  const testEmail = 'test@example.com'
 
   it('should pass authentication with valid token', async () => {
-    const token = await generateToken(testUserId, testSecret)
+    const token = await generateToken(testUserId, testEmail, testSecret)
     const next = vi.fn()
 
     const mockContext = createMockContext({
@@ -24,6 +25,7 @@ describe('authMiddleware', () => {
 
     expect(next).toHaveBeenCalledOnce()
     expect(mockContext.set).toHaveBeenCalledWith('userId', testUserId)
+    expect(mockContext.set).toHaveBeenCalledWith('userEmail', testEmail)
   })
 
   it('should return 401 if no authorization header', async () => {
@@ -118,27 +120,34 @@ describe('authMiddleware', () => {
   })
 
   it('should set userId in context', async () => {
-    const token = await generateToken(testUserId, testSecret)
+    const token = await generateToken(testUserId, testEmail, testSecret)
     const next = vi.fn()
 
     const mockContext = createMockContext({
       headers: {
         Authorization: `Bearer ${token}`,
       },
+      bindings: {
+        JWT_SECRET: testSecret,
+      },
     })
 
     await authMiddleware(mockContext, next)
 
     expect(mockContext.set).toHaveBeenCalledWith('userId', testUserId)
+    expect(mockContext.set).toHaveBeenCalledWith('userEmail', testEmail)
   })
 
   it('should extract token correctly from Bearer header', async () => {
-    const token = await generateToken(testUserId, testSecret)
+    const token = await generateToken(testUserId, testEmail, testSecret)
     const next = vi.fn()
 
     const mockContext = createMockContext({
       headers: {
         Authorization: `Bearer ${token}`,
+      },
+      bindings: {
+        JWT_SECRET: testSecret,
       },
     })
 

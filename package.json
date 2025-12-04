@@ -1,11 +1,11 @@
 {
   "name": "todo-list-hono-api",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "type": "module",
   "main": "src/index.ts",
   "license": "MIT",
   "scripts": {
-    "dev": "wrangler dev",
+    "dev": "wrangler dev --ip 0.0.0.0",
     "deploy": "wrangler deploy",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
