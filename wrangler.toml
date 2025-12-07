@@ -22,3 +22,6 @@ database_id = "0325a644-dfd4-4af8-9ace-c38be14fa187"
 [[env.production.r2_buckets]]
 binding = "IMAGES"
 bucket_name = "todo-images"
+
+[limits]
+cpu_ms = 300_000
