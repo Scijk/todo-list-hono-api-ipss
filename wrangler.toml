@@ -5,7 +5,8 @@ compatibility_date = "2025-11-24"
 [[d1_databases]]
 binding = "DB"
 database_name = "basic-hono-todos-db"
-database_id = "0325a644-dfd4-4af8-9ace-c38be14fa187"
+database_id = "71de3818-7fb4-4eeb-ac65-036fb2c70e40"
+migrations_dir = "migrations"
 
 [[r2_buckets]]
 binding = "IMAGES"
@@ -17,7 +18,8 @@ name = "basic-hono-api-production"
 [[env.production.d1_databases]]
 binding = "DB"
 database_name = "basic-hono-todos-db"
-database_id = "0325a644-dfd4-4af8-9ace-c38be14fa187"
+database_id = "71de3818-7fb4-4eeb-ac65-036fb2c70e40"
+migrations_dir = "migrations"
 
 [[env.production.r2_buckets]]
 binding = "IMAGES"
