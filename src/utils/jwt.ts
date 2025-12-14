@@ -5,6 +5,8 @@ const getSecretKey = (jwtSecret: string): Uint8Array => {
 }
 
 export const generateToken = async (userId: string, email: string, jwtSecret: string): Promise<string> => {
+  console.log('JWT_SECRET exists:', !!jwtSecret)
+  console.log('userId exists:', !!userId)
   const secret = getSecretKey(jwtSecret)
 
   const token = await new SignJWT({ email })

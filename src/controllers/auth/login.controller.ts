@@ -52,6 +52,7 @@ export const loginController = async (c: Context<{ Bindings: Bindings }>) => {
     // Generar token
     const token = await generateToken(user.id, user.email, c.env.JWT_SECRET)
 
+    console.log('Generated token:', token)
     return c.json({
       success: true,
       data: {
