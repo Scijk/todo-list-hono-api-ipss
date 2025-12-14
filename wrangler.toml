@@ -13,7 +13,7 @@ binding = "IMAGES"
 bucket_name = "todo-images"
 
 [env.production]
-name = "basic-hono-api-production"
+name = "todo-list-hono-api-ipss"
 
 [[env.production.d1_databases]]
 binding = "DB"
@@ -24,6 +24,3 @@ migrations_dir = "migrations"
 [[env.production.r2_buckets]]
 binding = "IMAGES"
 bucket_name = "todo-images"
-
-[limits]
-cpu_ms = 300_000
