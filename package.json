@@ -4,6 +4,7 @@
   "type": "module",
   "main": "src/index.ts",
   "license": "MIT",
+  "packageManager": "yarn@4.9.1",
   "scripts": {
     "dev": "wrangler dev --ip 0.0.0.0",
     "deploy": "wrangler deploy",
@@ -28,6 +29,8 @@
     "@typescript-eslint/eslint-plugin": "^8.48.0",
     "@typescript-eslint/parser": "^8.48.0",
     "@vitest/coverage-v8": "3.2.4",
+    "@vitest/runner": "^4.0.15",
+    "@vitest/snapshot": "^4.0.15",
     "@vitest/ui": "3.2.4",
     "eslint": "^9.39.1",
     "eslint-config-standard": "^17.1.0",
